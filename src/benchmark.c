@@ -5,7 +5,7 @@
 #include <float.h>  // For: DBL_EPSILON
 #include <math.h>   // For: fabs
 
-#ifdef GETTIMEOFDAY
+#ifdef __APPLE__
 #include <sys/time.h> // For struct timeval, gettimeofday
 #else
 #include <time.h> // For struct timespec, clock_gettime, CLOCK_MONOTONIC
@@ -35,7 +35,7 @@ extern void square_dgemm (int, double*, double*, double*);
 
 double wall_time ()
 {
-#ifdef GETTIMEOFDAY
+#ifdef __APPLE__
   struct timeval t;
   gettimeofday (&t, NULL);
   return 1.*t.tv_sec + 1.e-6*t.tv_usec;
