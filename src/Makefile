@@ -2,7 +2,7 @@
 # This makefile is intended for the GNU C compiler. On Hopper, the Portland compilers are default, so you must instruct the Cray compiler wrappers to switch to GNU: type "module swap PrgEnv-pgi PrgEnv-gnu"
 UNAME := $(shell uname)
 CC = cc 
-OPT = -O3 -msse2
+OPT = -O3 -msse -msse2 -msse3 -m3dnow -mfpmath=sse -ffast-math -funroll-loops
 CFLAGS = $(OPT) -Wall -std=gnu99 
 LDFLAGS = -Wall
 # librt is needed for clock_gettime
