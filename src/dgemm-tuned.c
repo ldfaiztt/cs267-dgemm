@@ -1,7 +1,7 @@
 const char* dgemm_desc = "Simple blocked dgemm.";
 
 #if !defined(BLOCK_SIZE)
-#define BLOCK_SIZE 41
+#define BLOCK_SIZE 64
 #endif
 
 #define min(a,b) (((a)<(b))?(a):(b))
@@ -9,15 +9,27 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 /* This auxiliary subroutine performs a smaller dgemm operation
  *  C := C + A * B
  * where C is M-by-N, A is M-by-K, and B is K-by-N. */
-static void do_block (int lda, int M, int N, int K, double* A, double* B, double* C)
+static inline void do_block (int lda, int M, int N, int K, double* A, double* B, double* C)
 {
-  for (int i = 0; i < M; ++i)
+  for (int k = 0; k < K; ++k)
     for (int j = 0; j < N; ++j) 
     {
-      double c_ij = C[i+j*lda];
-      for (int k = 0; k < K; ++k)
-        c_ij += A[i+k*lda] * B[k+j*lda];
-      C[i+j*lda] = c_ij;
+      double b_kj = B[k+j*lda];
+      int i = 0;
+      /*
+      for (; i+3 < M; i+=4) {
+        double a_ik = A[i+k*lda];
+        double a_i1k = A[i+1+k*lda];
+        double a_i2k = A[i+2+k*lda];
+        double a_i3k = A[i+3+k*lda];
+        C[i+j*lda] += a_ik * b_kj;
+        C[i+1+j*lda] += a_i1k * b_kj;
+        C[i+2+j*lda] += a_i2k * b_kj;
+        C[i+3+j*lda] += a_i3k * b_kj;
+      }
+      */
+      for (; i < M; ++i)
+        C[i+j*lda] += A[i+k*lda] * b_kj;
     }
 }
 
