@@ -3,7 +3,7 @@
 
 CC = cc 
 OPT = -O1
-CFLAGS = $(OPT) #-Wall -std=gnu99 
+CFLAGS = $(OPT) -Wall -std=gnu99 
 LDFLAGS = -Wall
 # librt is needed for clock_gettime
 LDLIBS = -lrt
