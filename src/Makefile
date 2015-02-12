@@ -31,8 +31,8 @@ LDFLAGS = -Wall
 # librt is needed for clock_gettime
 
 
-targets = benchmark-naive benchmark-blocked benchmark-blas benchmark-tuned
-objects = benchmark.o dgemm-naive.o dgemm-blocked.o dgemm-tuned.o dgemm-blas.o  
+targets = benchmark-naive benchmark-blocked benchmark-blas benchmark-tuned search_optimal
+objects = benchmark.o dgemm-naive.o dgemm-blocked.o dgemm-tuned.o dgemm-blas.o  search_optimal.o
 
 .PHONY : default
 default : all
@@ -47,6 +47,8 @@ benchmark-blocked : benchmark.o dgemm-blocked.o
 benchmark-blas : benchmark.o dgemm-blas.o
 	$(CC) -o $@ $^ $(LDLIBS)
 benchmark-tuned : benchmark.o dgemm-tuned.o
+	$(CC) -o $@ $^ $(LDLIBS)
+search_optimal: search_optimal.o dgemm-tuned.o
 	$(CC) -o $@ $^ $(LDLIBS)
 %.o : %.c
 	$(CC) -c $(CFLAGS) $<
