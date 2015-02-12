@@ -1,8 +1,11 @@
+#!/bin/bash -l
 #PBS -V
-#PBS -l mppwidth=1
-#PBS -l mppnppn=1
-#PBS -j eo
+#PBS -q ccm_queue
+#PBS -l mppwidth=100
 #PBS -A mp309
+#PBS -l walltime=24:00:00
 
+module load ccm
+export CRAY_ROOTFS=DSL
 cd $PBS_O_WORKDIR
-aprun -n 1 -N 1 ./search_optimal
+ccmrun ./runsearch.sh
