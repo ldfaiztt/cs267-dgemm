@@ -68,6 +68,13 @@ void absolute_value (double *p, int n)
 /* The benchmarking program */
 int main (int argc, char **argv)
 {
+  if (argc != 4) 
+    die("usage: search_optimal block_size_row block_size_col block_size_inner");
+  int block_size_row = atoi(argv[1]), 
+    block_size_col = atoi(argv[2]),
+    block_size_inner = atoi(argv[3]);
+
+  printf("row: %d, col: %d, inner: %d\n", block_size_row, block_size_col, block_size_inner);
   printf ("Description:\t%s\n\n", dgemm_desc);
 
   /* Test sizes should highlight performance dips at multiples of certain powers-of-two */
@@ -91,97 +98,80 @@ int main (int argc, char **argv)
   buf = (double*) malloc (3 * nmax * nmax * sizeof(double));
   if (buf == NULL) die ("failed to allocate largest problem size");
 
-  double Mflops_s[nsizes],per[nsizes],aveper,max_aveper = 0.0;
+  double Mflops_s[nsizes],per[nsizes],aveper;
 
-  for (int block_size_row = 10; block_size_row < 300; block_size_row += 10)
+  /* For each test size */
+  for (int isize = 0; isize < sizeof(test_sizes)/sizeof(test_sizes[0]); ++isize)
   {
-    for (int block_size_col = 10; block_size_col < 300; block_size_col += 10)
+    /* Create and fill 3 random matrices A,B,C*/
+    int n = test_sizes[isize];
+
+    double* A = buf + 0;
+    double* B = A + nmax*nmax;
+    double* C = B + nmax*nmax;
+
+    fill (A, n*n);
+    fill (B, n*n);
+    fill (C, n*n);
+
+    /* Measure performance (in Gflops/s). */
+
+    /* Time a "sufficiently long" sequence of calls to reduce noise */
+    double Gflops_s, seconds = -1.0;
+    double timeout = 0.1; // "sufficiently long" := at least 1/10 second.
+    for (int n_iterations = 1; seconds < timeout; n_iterations *= 2) 
     {
-      for (int block_size_inner = 10; block_size_inner < 300; block_size_inner += 10)
-      {
-        /* For each test size */
-        for (int isize = 0; isize < sizeof(test_sizes)/sizeof(test_sizes[0]); ++isize)
-        {
-          /* Create and fill 3 random matrices A,B,C*/
-          int n = test_sizes[isize];
+      /* Warm-up */
+      square_dgemm_impl (n, A, B, C, block_size_row, block_size_col, block_size_inner);
 
-          double* A = buf + 0;
-          double* B = A + nmax*nmax;
-          double* C = B + nmax*nmax;
+      /* Benchmark n_iterations runs of square_dgemm */
+      seconds = -wall_time();
+      for (int it = 0; it < n_iterations; ++it)
+	      square_dgemm_impl (n, A, B, C, block_size_row, block_size_col, block_size_inner);
+      seconds += wall_time();
 
-          fill (A, n*n);
-          fill (B, n*n);
-          fill (C, n*n);
-
-          /* Measure performance (in Gflops/s). */
-
-          /* Time a "sufficiently long" sequence of calls to reduce noise */
-          double Gflops_s, seconds = -1.0;
-          double timeout = 0.1; // "sufficiently long" := at least 1/10 second.
-          for (int n_iterations = 1; seconds < timeout; n_iterations *= 2) 
-          {
-            /* Warm-up */
-            square_dgemm_impl (n, A, B, C, block_size_row, block_size_col, block_size_inner);
-
-            /* Benchmark n_iterations runs of square_dgemm */
-            seconds = -wall_time();
-            for (int it = 0; it < n_iterations; ++it)
-      	      square_dgemm_impl (n, A, B, C, block_size_row, block_size_col, block_size_inner);
-            seconds += wall_time();
-
-            /*  compute Gflop/s rate */
-            Gflops_s = 2.e-9 * n_iterations * n * n * n / seconds;
-          }
-        
-          /* Storing Mflop rate and calculating percentage of peak */
-          Mflops_s[isize] = Gflops_s*1000;
-          per[isize] = Gflops_s*100/MAX_SPEED;
-
-          printf ("Size: %d\tMflop/s: %8g\tPercentage:%6.2lf\n", n, Mflops_s[isize],per[isize]);
-
-          /* Ensure that error does not exceed the theoretical error bound. */
-
-          /* C := A * B, computed with square_dgemm */
-          memset (C, 0, n * n * sizeof(double));
-          square_dgemm_impl (n, A, B, C, block_size_row, block_size_col, block_size_inner);
-
-          /* Do not explicitly check that A and B were unmodified on square_dgemm exit
-           *  - if they were, the following will most likely detect it:   
-           * C := C - A * B, computed with reference_dgemm */
-          reference_dgemm(n, -1., A, B, C);
-
-          /* A := |A|, B := |B|, C := |C| */
-          absolute_value (A, n * n);
-          absolute_value (B, n * n);
-          absolute_value (C, n * n);
-
-          /* C := |C| - 3 * e_mach * n * |A| * |B|, computed with reference_dgemm */ 
-          reference_dgemm (n, -3.*DBL_EPSILON*n, A, B, C);
-
-          /* If any element in C is positive, then something went wrong in square_dgemm */
-          for (int i = 0; i < n * n; ++i)
-            if (C[i] > 0)
-      	      die("*** FAILURE *** Error in matrix multiply exceeds componentwise error bounds.\n" );
-        }
-        /* Calculating average percentage of peak reached by algorithm */
-        aveper=0;
-        for (int i=0; i<nsizes;i++)
-          aveper+= per[i];
-        aveper/=nsizes*1.0;
-        
-        /* Printing average percentage and grade to screen */
-        printf("Average percentage of Peak = %g\n",aveper);  
-
-        if (aveper > max_aveper) {
-          max_aveper = aveper;
-          printf("Max average percentage of Peak found = %g\n",aveper);  
-          printf("Parameter: row %d, col %d, inner %d.\n", block_size_row, block_size_col, block_size_inner);
-        }
-      }
+      /*  compute Gflop/s rate */
+      Gflops_s = 2.e-9 * n_iterations * n * n * n / seconds;
     }
+  
+    /* Storing Mflop rate and calculating percentage of peak */
+    Mflops_s[isize] = Gflops_s*1000;
+    per[isize] = Gflops_s*100/MAX_SPEED;
+
+    printf ("Size: %d\tMflop/s: %8g\tPercentage:%6.2lf\n", n, Mflops_s[isize],per[isize]);
+
+    /* Ensure that error does not exceed the theoretical error bound. */
+
+    /* C := A * B, computed with square_dgemm */
+    memset (C, 0, n * n * sizeof(double));
+    square_dgemm_impl (n, A, B, C, block_size_row, block_size_col, block_size_inner);
+
+    /* Do not explicitly check that A and B were unmodified on square_dgemm exit
+     *  - if they were, the following will most likely detect it:   
+     * C := C - A * B, computed with reference_dgemm */
+    reference_dgemm(n, -1., A, B, C);
+
+    /* A := |A|, B := |B|, C := |C| */
+    absolute_value (A, n * n);
+    absolute_value (B, n * n);
+    absolute_value (C, n * n);
+
+    /* C := |C| - 3 * e_mach * n * |A| * |B|, computed with reference_dgemm */ 
+    reference_dgemm (n, -3.*DBL_EPSILON*n, A, B, C);
+
+    /* If any element in C is positive, then something went wrong in square_dgemm */
+    for (int i = 0; i < n * n; ++i)
+      if (C[i] > 0)
+	      die("*** FAILURE *** Error in matrix multiply exceeds componentwise error bounds.\n" );
   }
-
-
+  /* Calculating average percentage of peak reached by algorithm */
+  aveper=0;
+  for (int i=0; i<nsizes;i++)
+    aveper+= per[i];
+  aveper/=nsizes*1.0;
+  
+  /* Printing average percentage and grade to screen */
+  printf("Average percentage of Peak = %g\n",aveper);  
 
   free (buf);
 
