@@ -1,11 +1,20 @@
-#!/bin/bash -l
 #PBS -V
-#PBS -q ccm_queue
-#PBS -l mppwidth=100
+#PBS -l mppwidth=50
+#PBS -l walltime=3:00:00
+#PBS -l mppnppn=1
+#PBS -j eo
 #PBS -A mp309
-#PBS -l walltime=24:00:00
 
-module load ccm
-export CRAY_ROOTFS=DSL
+module load taskfarmer
+
 cd $PBS_O_WORKDIR
-ccmrun ./runsearch.sh
+
+tf -b -n 50 &
+for i in {10..300..10} do
+    for j in {10..300..10} do
+        for k in {10..300..10} do
+            tfrun -t 1 ./search_optimal $i $j $k &
+        done
+    done
+done
+wait
