@@ -110,7 +110,7 @@ static inline void do_block (int lda, int M, int N, int K, double* A, double* B,
   int fringe1 = M%4;
   int fringe2 = N%4;
 
-  int i, j, p;
+  int i = 0, j = 0, p = 0;
 
   /* For each column of B */
   for (j = 0 ; j < Nmax; j += 4) 
@@ -133,13 +133,13 @@ static inline void do_block (int lda, int M, int N, int K, double* A, double* B,
     /* For each row of A */
     for ( ; i < M; ++i)
       /* For each column of B */ 
-      for (p=0; p < N; ++p) 
+      for (p = 0; p < N; ++p) 
       {
         /* Compute C[i,j] */
-        double cip = ARRAY(C,i,p);
+        double c_ip = ARRAY(C,i,p);
         for (int k = 0; k < K; ++k)
-          cip += ARRAY(A,i,k) * ARRAY(B,k,p);
-        ARRAY(C,i,p) = cip;
+          c_ip += ARRAY(A,i,k) * ARRAY(B,k,p);
+        ARRAY(C,i,p) = c_ip;
       }
   }
   if (fringe2 != 0) 
@@ -148,7 +148,7 @@ static inline void do_block (int lda, int M, int N, int K, double* A, double* B,
     /* For each column of B */
     for ( ; j < N; ++j)
       /* For each row of A */ 
-      for (i=0; i < Mmax; ++i) 
+      for (i = 0; i < Mmax; ++i) 
       {
         /* Compute C[i,j] */
         double cij = ARRAY(C,i,j);
