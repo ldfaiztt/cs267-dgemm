@@ -7,9 +7,16 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define RSIZE_K 2
 #define RSIZE_N 2
 #define I_STRIDE 2
+  
+#define BLOCK_ROW 222 
+#define BLOCK_COL 12 
+#define BLOCK_INNER 222 
 
-#define turn_even(M) (((M)+1)&(~0x1))
-#define min(x,y)  ((y)^(((x)^(y)) & -((x)<(y))))
+#define turn_even(x) (((x) & 1) ? (x+1) : (x))
+#define min(a,b) (((a)<(b))?(a):(b))
+
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
 
 static inline void do_block(int M, int K, int N, double* restrict A, double* restrict B, double* restrict C) 
 {
@@ -43,37 +50,23 @@ static inline void do_block(int M, int K, int N, double* restrict A, double* res
   }
 }
 
-static inline double* copy_block(int lda, int M, int N, double* restrict A, double* restrict new_A) 
+static inline void copy_block(int lda, int M, int N, double* restrict A, double* restrict new_A) 
 {
   int M_even = turn_even(M);
   int N_even = turn_even(N);
-  int i_step;
-  __m128d a;
 
   for (int j=0; j<N; j++) 
   {
-    for (int i=0; i<M; i+=I_STRIDE) 
-    {
-      i_step = min(I_STRIDE, M-i);
-      if (i_step == 1) 
-      {            
-        new_A[i+j*M_even] = A[i+j*lda];
-      } 
-      else 
-      {
-        a = _mm_loadu_pd(A+i+j*lda);
-        _mm_store_pd(new_A+i+j*M_even, a);
-      }
-    }
+    int new_A_idx = j * M_even;
+    int A_idx = j * lda;
+    memcpy(&new_A[new_A_idx], &A[A_idx], M*sizeof(double));
   }
   if (N % 2) 
   {
-    for (int i=0; i<M_even; i++) 
-    {
-      new_A[i+(N_even-1)*M_even] = 0.0;
-    }
+    int idx = (N_even-1) * M_even;
+    new_A += idx;
+    memset(new_A, 0, M_even * sizeof(double));
   } 
-  return new_A;
 }
 
 static inline void add_block(double* new_A, double*  A, int M, int N, int lda, int M_even) 
@@ -85,7 +78,7 @@ static inline void add_block(double* new_A, double*  A, int M, int N, int lda, i
     for (int i=0; i<M; i+=I_STRIDE) 
     {
       i_step = min(I_STRIDE,M-i); 
-      if (i_step == 1) 
+      if (unlikely(i_step == 1))
       {
         A[i+j*lda] = new_A[i+j*M_even];
       } 
@@ -102,29 +95,29 @@ static inline void add_block(double* new_A, double*  A, int M, int N, int lda, i
  *  C := C + A * B
  * where A, B, and C are lda-by-lda matrices stored in column-major format. 
  * On exit, A and B maintain their input values. */  
-void square_dgemm_impl(int lda, double* A, double* B, double* C, int block_size_row, int block_size_col, int block_size_inner) 
+void square_dgemm(int lda, double* A, double* B, double* C)
 {
   int M_even, K_even, N_even;
 
-  double new_A[block_size_row * block_size_inner] __attribute__((aligned(16)));
-  double new_B[block_size_inner * turn_even(lda)] __attribute__((aligned(16)));
-  double new_C[block_size_row * block_size_col] __attribute__((aligned(16)));
+  double new_A[BLOCK_ROW * BLOCK_INNER] __attribute__((aligned(16)));
+  double new_B[BLOCK_INNER * turn_even(lda)] __attribute__((aligned(16)));
+  double new_C[BLOCK_ROW * BLOCK_COL] __attribute__((aligned(16)));
 
-  for (int k = 0; k < lda; k += block_size_inner) 
+  for (int k = 0; k < lda; k += BLOCK_INNER) 
   {
-    int K = min(block_size_inner, lda-k);
+    int K = min(BLOCK_INNER, lda-k);
     copy_block(lda, K, lda, B+k, new_B);
     K_even = turn_even(K);
 
-    for (int i = 0; i < lda; i += block_size_row) 
+    for (int i = 0; i < lda; i += BLOCK_ROW) 
     {
-      int M = min (block_size_row, lda-i);
+      int M = min (BLOCK_ROW, lda-i);
       copy_block(lda, M, K, A+i+k*lda, new_A);
       M_even = turn_even(M);
 
-      for (int j = 0; j < lda; j += block_size_col) 
+      for (int j = 0; j < lda; j += BLOCK_COL) 
       {
-        int N = min (block_size_col, lda-j);
+        int N = min (BLOCK_COL, lda-j);
         N_even = turn_even(N);               
         copy_block(lda, M, N, C+i+j*lda, new_C);
 
@@ -135,10 +128,6 @@ void square_dgemm_impl(int lda, double* A, double* B, double* C, int block_size_
   }
 }
 
-void square_dgemm(int lda, double* A, double* B, double* C)
+void square_dgemm_impl(int lda, double* A, double* B, double* C, int block_size_row, int block_size_col, int block_size_inner)
 {
-  int block_size_row = 222; 
-  int block_size_col = 12; 
-  int block_size_inner = 222; 
-  square_dgemm_impl(lda, A, B, C, block_size_row, block_size_col, block_size_inner);
 }

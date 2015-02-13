@@ -2,26 +2,11 @@
 # This makefile is intended for the GNU C compiler. On Hopper, the Portland compilers are default, so you must instruct the Cray compiler wrappers to switch to GNU: type "module swap PrgEnv-pgi PrgEnv-gnu"
 UNAME := $(shell uname)
 CC = cc 
+OPT = -O3 -march=barcelona -ffast-math -fassociative-math -funroll-loops -msse -msse2 -mfpmath=sse 
 
 ifeq ($(UNAME), Darwin)
-OPT = -O3 \
-	-ftree-vectorize \
-	-ftree-slp-vectorize \
-	-funroll-loops \
-	-funroll-all-loops \
-	-fprefetch-loop-arrays 
 LDLIBS = -lblas
 else
-OPT = -O3 \
-	-march=barcelona \
-	-ftree-vectorize \
-	-ftree-slp-vectorize \
-	-funroll-loops \
-	-fvariable-expansion-in-unroller \
-	-fsched-pressure \
-	-funroll-all-loops \
-	-fprefetch-loop-arrays \
-	-ftree-vectorizer-verbose=3
 LDLIBS = -lrt
 endif
 
