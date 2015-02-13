@@ -1,0 +1,50 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+Description:	Simple blocked dgemm.
+
+Size: 31	Mflop/s:  2997.63	Percentage: 35.69
+Size: 32	Mflop/s:  3247.36	Percentage: 38.66
+Size: 96	Mflop/s:  3484.25	Percentage: 41.48
+Size: 97	Mflop/s:  3511.89	Percentage: 41.81
+Size: 127	Mflop/s:  3125.71	Percentage: 37.21
+Size: 128	Mflop/s:   3194.9	Percentage: 38.03
+Size: 129	Mflop/s:  3304.35	Percentage: 39.34
+Size: 191	Mflop/s:  3296.69	Percentage: 39.25
+Size: 192	Mflop/s:  3348.07	Percentage: 39.86
+Size: 229	Mflop/s:  3488.72	Percentage: 41.53
+Size: 255	Mflop/s:  3559.41	Percentage: 42.37
+Size: 256	Mflop/s:  3604.56	Percentage: 42.91
+Size: 257	Mflop/s:  3565.74	Percentage: 42.45
+Size: 319	Mflop/s:  3511.86	Percentage: 41.81
+Size: 320	Mflop/s:   3542.7	Percentage: 42.18
+Size: 321	Mflop/s:  3530.16	Percentage: 42.03
+Size: 417	Mflop/s:  3618.37	Percentage: 43.08
+Size: 479	Mflop/s:  3605.07	Percentage: 42.92
+Size: 480	Mflop/s:  3627.56	Percentage: 43.19
+Size: 511	Mflop/s:  3575.97	Percentage: 42.57
+Size: 512	Mflop/s:  3599.33	Percentage: 42.85
+Size: 639	Mflop/s:  3618.53	Percentage: 43.08
+Size: 640	Mflop/s:  3636.23	Percentage: 43.29
+Size: 767	Mflop/s:  3595.88	Percentage: 42.81
+Size: 768	Mflop/s:  3611.31	Percentage: 42.99
+Size: 769	Mflop/s:  3586.46	Percentage: 42.70
+Average percentage of Peak = 41.3868
+Application 44879334 resources: utime ~12s, stime ~0s, Rss ~17940, inblocks ~8046, outblocks ~20762
+
+ + --------------------------------------------------------------------------
+ +        Job name: job-tuned
+ +          Job Id: 8744972.hopque01
+ +          System: hopper
+ +     Queued Time: Thu Feb 12 22:00:32 2015
+ +      Start Time: Thu Feb 12 22:02:50 2015
+ + Completion Time: Thu Feb 12 22:03:07 2015
+ +            User: clan
+ +        MOM Host: nid04943
+ +           Queue: debug
+ +  Req. Resources: mppnodect=1,mppnppn=1,mppwidth=1,walltime=00:30:00
+ +  Used Resources: cput=00:00:00,mem=6012kb,vmem=59392kb,walltime=00:00:16
+ +     Acct String: mp309
+ +   PBS_O_WORKDIR: /global/u1/c/clan/cs267-hw/src
+ +     Submit Args: job-tuned
+ + --------------------------------------------------------------------------
+
