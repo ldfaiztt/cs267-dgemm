@@ -6,6 +6,7 @@ OPT = -O3 -funroll-loops -ffast-math
 
 ifeq ($(UNAME), Darwin)
 LDLIBS = -lblas
+CC = gcc
 else
 LDLIBS = -lrt
 OPT += -march=opteron
@@ -15,8 +16,8 @@ CFLAGS = $(OPT) -Wall -std=gnu99 -msse -msse2 -msse3
 LDFLAGS = -Wall
 # librt is needed for clock_gettime
 
-targets = benchmark-naive benchmark-blocked benchmark-blas benchmark-tuned
-objects = benchmark.o dgemm-naive.o dgemm-blocked.o dgemm-tuned.o dgemm-blas.o
+targets = benchmark-naive benchmark-blocked benchmark-blas
+objects = benchmark.o dgemm-naive.o dgemm-blocked.o dgemm-blas.o
 
 .PHONY : default
 default : all
@@ -29,8 +30,6 @@ benchmark-naive : benchmark.o dgemm-naive.o
 benchmark-blocked : benchmark.o dgemm-blocked.o
 	$(CC) -o $@ $^ $(LDLIBS)
 benchmark-blas : benchmark.o dgemm-blas.o
-	$(CC) -o $@ $^ $(LDLIBS)
-benchmark-tuned : benchmark.o dgemm-tuned.o
 	$(CC) -o $@ $^ $(LDLIBS)
 %.o : %.c
 	$(CC) -c $(CFLAGS) $<
