@@ -1,0 +1,50 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+Description:	Simple blocked dgemm.
+
+Size: 31	Mflop/s:  849.561	Percentage: 10.11
+Size: 32	Mflop/s:  851.944	Percentage: 10.14
+Size: 96	Mflop/s:  843.419	Percentage: 10.04
+Size: 97	Mflop/s:  849.683	Percentage: 10.12
+Size: 127	Mflop/s:  876.033	Percentage: 10.43
+Size: 128	Mflop/s:  844.993	Percentage: 10.06
+Size: 129	Mflop/s:  878.748	Percentage: 10.46
+Size: 191	Mflop/s:  867.812	Percentage: 10.33
+Size: 192	Mflop/s:  859.036	Percentage: 10.23
+Size: 229	Mflop/s:  849.464	Percentage: 10.11
+Size: 255	Mflop/s:  810.554	Percentage:  9.65
+Size: 256	Mflop/s:   770.89	Percentage:  9.18
+Size: 257	Mflop/s:   811.97	Percentage:  9.67
+Size: 319	Mflop/s:  856.982	Percentage: 10.20
+Size: 320	Mflop/s:  848.405	Percentage: 10.10
+Size: 321	Mflop/s:   857.97	Percentage: 10.21
+Size: 417	Mflop/s:  853.422	Percentage: 10.16
+Size: 479	Mflop/s:  848.375	Percentage: 10.10
+Size: 480	Mflop/s:  834.955	Percentage:  9.94
+Size: 511	Mflop/s:  763.968	Percentage:  9.09
+Size: 512	Mflop/s:  679.487	Percentage:  8.09
+Size: 639	Mflop/s:  833.032	Percentage:  9.92
+Size: 640	Mflop/s:  800.962	Percentage:  9.54
+Size: 767	Mflop/s:  766.249	Percentage:  9.12
+Size: 768	Mflop/s:  730.592	Percentage:  8.70
+Size: 769	Mflop/s:  766.229	Percentage:  9.12
+Average percentage of Peak = 9.8007
+Application 44880929 resources: utime ~27s, stime ~0s, Rss ~16196, inblocks ~8025, outblocks ~20698
+
+ + --------------------------------------------------------------------------
+ +        Job name: job-blocked
+ +          Job Id: 8745190.hopque01
+ +          System: hopper
+ +     Queued Time: Thu Feb 12 22:20:04 2015
+ +      Start Time: Thu Feb 12 22:22:36 2015
+ + Completion Time: Thu Feb 12 22:23:08 2015
+ +            User: clan
+ +        MOM Host: nid05610
+ +           Queue: debug
+ +  Req. Resources: mppnodect=1,mppnppn=1,mppwidth=1,walltime=00:30:00
+ +  Used Resources: cput=00:00:00,mem=0kb,vmem=0kb,walltime=00:00:32
+ +     Acct String: mp309
+ +   PBS_O_WORKDIR: /global/u1/c/clan/cs267-hw/src
+ +     Submit Args: job-blocked
+ + --------------------------------------------------------------------------
+
