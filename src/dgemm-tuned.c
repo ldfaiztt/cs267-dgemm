@@ -22,9 +22,9 @@ static inline void do_block(int M, int K, int N, double* restrict A, double* res
 {
   __m128d c0, c1, a0, a1, b0, b1, b2, b3, d0, d1;    
 
-  for (int k=0; k<K; k+=RSIZE_K) 
+  for (int j=0; j<N; j+=RSIZE_N) 
   {
-    for (int j=0; j<N; j+=RSIZE_N) 
+    for (int k=0; k<K; k+=RSIZE_K) 
     {
       b0 = _mm_load1_pd(B+k+j*K);
       b1 = _mm_load1_pd(B+k+1+j*K);
