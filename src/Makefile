@@ -9,7 +9,7 @@ LDLIBS = -lblas
 CC = gcc
 else
 LDLIBS = -lrt
-OPT += -march=barcelona
+OPT += -march=opteron
 endif
 
 CFLAGS = $(OPT) -Wall -std=gnu99 -msse -msse2 -msse3
